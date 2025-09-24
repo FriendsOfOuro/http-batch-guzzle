@@ -1,0 +1,38 @@
+{
+    "name": "friendsofouro/http-batch-guzzle",
+    "description": "Guzzle implementation for a batch of HTTP Requests",
+    "license": "MIT",
+    "require": {
+        "php": "^8.4",
+        "friendsofouro/http-batch-contract": "^1.0",
+        "guzzlehttp/guzzle": "^7.10",
+        "kevinrob/guzzle-cache-middleware": "^7.0",
+        "symfony/cache": "^7.3"
+    },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.48",
+        "friendsofphp/php-cs-fixer": "^3.88",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^12.3",
+        "rector/rector": "^2.1"
+    },
+    "provide": {
+        "friendsofouro/http-batch-implementation": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FriendsOfOuro\\Http\\Batch\\Guzzle\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FriendsOfOuro\\Http\\Batch\\Guzzle\\Tests\\": "tests"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true
+        },
+        "sort-packages": true
+    }
+}
