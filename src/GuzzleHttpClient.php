@@ -34,21 +34,23 @@ final readonly class GuzzleHttpClient implements BatchClientInterface
         ]);
     }
 
-    public static function withFilesystemCache(string $path): self
+    public static function withFilesystemCache(string $path, array $config = []): self
     {
         return self::withPsr6Cache(
-            new FilesystemAdapter(directory: $path)
+            new FilesystemAdapter(directory: $path),
+            $config
         );
     }
 
-    public static function withApcCache(): self
+    public static function withApcCache(array $config = []): self
     {
         return self::withPsr6Cache(
-            new ApcuAdapter()
+            new ApcuAdapter(),
+            $config
         );
     }
 
-    public static function withPsr6Cache(CacheItemPoolInterface $pool): self
+    public static function withPsr6Cache(CacheItemPoolInterface $pool, array $config = []): self
     {
         $stack = new HandlerStack(new CurlMultiHandler());
 
@@ -57,9 +59,10 @@ final readonly class GuzzleHttpClient implements BatchClientInterface
             'cache'
         );
 
-        $client = new Client([
-            'handler' => $stack,
-        ]);
+        $client = new Client(array_merge(
+            ['handler' => $stack],
+            $config
+        ));
 
         return new self($client);
     }
