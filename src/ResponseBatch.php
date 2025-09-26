@@ -7,7 +7,7 @@ namespace FriendsOfOuro\Http\Batch\Guzzle;
 use FriendsOfOuro\Http\Batch\BatchItemInterface;
 use FriendsOfOuro\Http\Batch\ResponseBatchInterface;
 
-final readonly class ResponseBatch implements ResponseBatchInterface, \Countable
+final readonly class ResponseBatch implements ResponseBatchInterface
 {
     /**
      * @param BatchItemInterface[] $results
@@ -24,24 +24,12 @@ final readonly class ResponseBatch implements ResponseBatchInterface, \Countable
 
     public function isCompleteSuccess(): bool
     {
-        foreach ($this->results as $result) {
-            if (!$result->isSuccess()) {
-                return false;
-            }
-        }
-
-        return true;
+        return array_all($this->results, fn ($result) => $result->isSuccess());
     }
 
     public function hasAnyFailures(): bool
     {
-        foreach ($this->results as $result) {
-            if (!$result->isSuccess()) {
-                return true;
-            }
-        }
-
-        return false;
+        return array_any($this->results, fn ($result) => !$result->isSuccess());
     }
 
     public function hasAnySuccesses(): bool
@@ -55,19 +43,25 @@ final readonly class ResponseBatch implements ResponseBatchInterface, \Countable
         return false;
     }
 
-    public function getSuccessfulResults(): array
+    public function getResponses(): array
     {
-        return array_filter($this->results, fn (BatchItemInterface $result) => $result->isSuccess());
+        return array_map(
+            fn (BatchItemInterface $result) => $result->getResponse(),
+            array_filter($this->results, fn (BatchItemInterface $result) => $result->isSuccess())
+        );
     }
 
-    public function getFailedResults(): array
+    public function getExceptions(): array
     {
-        return array_filter($this->results, fn (BatchItemInterface $result) => !$result->isSuccess());
+        return array_map(
+            fn (BatchItemInterface $result) => $result->getException(),
+            array_filter($this->results, fn (BatchItemInterface $result) => !$result->isSuccess())
+        );
     }
 
-    public function filter(callable $predicate): array
+    public function filter(callable $predicate): static
     {
-        return array_filter($this->results, $predicate);
+        return new self(array_filter($this->results, $predicate));
     }
 
     public function count(): int
