@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace FriendsOfOuro\Http\Batch\Guzzle;
 
 use FriendsOfOuro\Http\Batch\ClientInterface as BatchClientInterface;
+use FriendsOfOuro\Http\Batch\ResponseBatchInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
@@ -16,6 +17,7 @@ use Kevinrob\GuzzleCache\CacheMiddleware;
 use Kevinrob\GuzzleCache\Storage\Psr6CacheStorage;
 use Kevinrob\GuzzleCache\Strategy\PublicCacheStrategy;
 use Psr\Cache\CacheItemPoolInterface;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Cache\Adapter\ApcuAdapter;
@@ -62,21 +64,31 @@ final readonly class GuzzleHttpClient implements BatchClientInterface
         return new self($client);
     }
 
-    public function sendRequestBatch(array $requests): array
+    public function sendRequestBatch(array $requests): ResponseBatchInterface
     {
         $responses = Pool::batch(
             $this->client,
             $requests
         );
 
-        foreach ($responses as $response) {
+        $batchItems = [];
+        foreach ($requests as $index => $request) {
+            $response = $responses[$index];
+
             if ($response instanceof \Exception) {
-                throw $response;
+                // Convert Guzzle exceptions to PSR-18 ClientExceptionInterface
+                $clientException = $this->convertException($response);
+                $batchItems[] = new BatchItem($request, null, $clientException);
+            } elseif ($response instanceof ResponseInterface) {
+                $batchItems[] = new BatchItem($request, $response);
+            } else {
+                // Fallback for unexpected types
+                $exception = new Exception\RequestException('Unexpected response type');
+                $batchItems[] = new BatchItem($request, null, $exception);
             }
         }
 
-        // @phpstan-ignore return.type
-        return $responses;
+        return new ResponseBatch($batchItems);
     }
 
     public function sendRequest(RequestInterface $request): ResponseInterface
@@ -88,5 +100,26 @@ final readonly class GuzzleHttpClient implements BatchClientInterface
         } catch (GuzzleRequestException $e) {
             throw new Exception\RequestException($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    private function convertException(\Exception $exception): ClientExceptionInterface
+    {
+        return match (true) {
+            $exception instanceof GuzzleClientException => new Exception\ClientException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            ),
+            $exception instanceof GuzzleRequestException => new Exception\RequestException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            ),
+            default => new Exception\RequestException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            ),
+        };
     }
 }

@@ -83,17 +83,17 @@ final class GuzzleHttpClientTest extends TestCase
             new Request('GET', 'http://example.com/3'),
         ];
 
-        $responses = $client->sendRequestBatch($requests);
+        $batch = $client->sendRequestBatch($requests);
 
-        $this->assertCount(3, $responses);
-        $this->assertEquals('Response 1', $responses[0]->getBody()->getContents());
-        $this->assertEquals('Response 2', $responses[1]->getBody()->getContents());
-        $this->assertEquals('Response 3', $responses[2]->getBody()->getContents());
+        $this->assertCount(3, $batch);
+        $this->assertTrue($batch->isCompleteSuccess());
+
+        $results = $batch->getResults();
+        $this->assertEquals('Response 1', $results[0]->getResponse()->getBody()->getContents());
+        $this->assertEquals('Response 2', $results[1]->getResponse()->getBody()->getContents());
+        $this->assertEquals('Response 3', $results[2]->getResponse()->getBody()->getContents());
     }
 
-    /**
-     * @throws \Exception
-     */
     public function test_send_request_batch_with_exception(): void
     {
         $mockHandler = new MockHandler([
@@ -113,22 +113,31 @@ final class GuzzleHttpClientTest extends TestCase
             new Request('GET', 'http://example.com/3'),
         ];
 
-        $this->expectException(GuzzleRequestException::class);
-        $this->expectExceptionMessage('Request failed');
+        $batch = $client->sendRequestBatch($requests);
 
-        $client->sendRequestBatch($requests);
+        $this->assertCount(3, $batch);
+        $this->assertFalse($batch->isCompleteSuccess());
+        $this->assertTrue($batch->hasAnyFailures());
+        $this->assertTrue($batch->hasAnySuccesses());
+
+        $results = $batch->getResults();
+        $this->assertTrue($results[0]->isSuccess());
+        $this->assertFalse($results[1]->isSuccess());
+        $this->assertTrue($results[2]->isSuccess());
+
+        $this->assertEquals('Response 1', $results[0]->getResponse()->getBody()->getContents());
+        $this->assertEquals('Request failed', $results[1]->getException()->getMessage());
+        $this->assertEquals('Response 3', $results[2]->getResponse()->getBody()->getContents());
     }
 
-    /**
-     * @throws \Exception
-     */
     public function test_send_request_batch_empty_array(): void
     {
         $client = new GuzzleHttpClient();
 
-        $responses = $client->sendRequestBatch([]);
+        $batch = $client->sendRequestBatch([]);
 
-        $this->assertCount(0, $responses);
+        $this->assertCount(0, $batch);
+        $this->assertTrue($batch->isCompleteSuccess()); // Empty batch is considered complete success
     }
 
     /**

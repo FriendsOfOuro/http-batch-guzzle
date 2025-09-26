@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e727491c70fd8b70bc2a1ad8cce52927",
+    "content-hash": "5b88c67c15b32b24023896b28a33045b",
     "packages": [
         {
             "name": "friendsofouro/http-batch-contract",
-            "version": "v1.0.0",
+            "version": "v2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfOuro/http-batch-contract.git",
-                "reference": "831832c21165fa88244c19485bff037cb971e8ca"
+                "reference": "336b477e6673e4b16f2ac5a9a5f823f2030000eb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfOuro/http-batch-contract/zipball/831832c21165fa88244c19485bff037cb971e8ca",
-                "reference": "831832c21165fa88244c19485bff037cb971e8ca",
+                "url": "https://api.github.com/repos/FriendsOfOuro/http-batch-contract/zipball/336b477e6673e4b16f2ac5a9a5f823f2030000eb",
+                "reference": "336b477e6673e4b16f2ac5a9a5f823f2030000eb",
                 "shasum": ""
             },
             "require": {
@@ -41,9 +41,9 @@
             "description": "Contract for a batch of HTTP Requests",
             "support": {
                 "issues": "https://github.com/FriendsOfOuro/http-batch-contract/issues",
-                "source": "https://github.com/FriendsOfOuro/http-batch-contract/tree/v1.0.0"
+                "source": "https://github.com/FriendsOfOuro/http-batch-contract/tree/v2.0.0"
             },
-            "time": "2025-09-24T22:16:17+00:00"
+            "time": "2025-09-26T14:06:17+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -2622,16 +2622,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.28",
+            "version": "2.1.29",
             "source": {
                 "type": "git",
-                "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "578fa296a166605d97b94091f724f1257185d278"
+                "url": "https://github.com/phpstan/phpstan-phar-composer-source.git",
+                "reference": "git"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/578fa296a166605d97b94091f724f1257185d278",
-                "reference": "578fa296a166605d97b94091f724f1257185d278",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/d618573eed4a1b6b75e37b2e0b65ac65c885d88e",
+                "reference": "d618573eed4a1b6b75e37b2e0b65ac65c885d88e",
                 "shasum": ""
             },
             "require": {
@@ -2676,7 +2676,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-19T08:58:49+00:00"
+            "time": "2025-09-25T06:58:18+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
