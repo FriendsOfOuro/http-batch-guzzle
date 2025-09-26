@@ -47,7 +47,7 @@ final readonly class ResponseBatch implements ResponseBatchInterface
     {
         return array_map(
             fn (BatchItemInterface $result) => $result->getResponse(),
-            array_filter($this->results, fn (BatchItemInterface $result) => $result->isSuccess())
+            array_values(array_filter($this->results, fn (BatchItemInterface $result) => $result->isSuccess()))
         );
     }
 
@@ -55,13 +55,13 @@ final readonly class ResponseBatch implements ResponseBatchInterface
     {
         return array_map(
             fn (BatchItemInterface $result) => $result->getException(),
-            array_filter($this->results, fn (BatchItemInterface $result) => !$result->isSuccess())
+            array_values(array_filter($this->results, fn (BatchItemInterface $result) => !$result->isSuccess()))
         );
     }
 
     public function filter(callable $predicate): static
     {
-        return new self(array_filter($this->results, $predicate));
+        return new self(array_values(array_filter($this->results, $predicate)));
     }
 
     public function count(): int

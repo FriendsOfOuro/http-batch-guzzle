@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace FriendsOfOuro\Http\Batch\Guzzle\Tests;
 
+use FriendsOfOuro\Http\Batch\Guzzle\BatchItem;
 use FriendsOfOuro\Http\Batch\Guzzle\Exception\ClientException;
 use FriendsOfOuro\Http\Batch\Guzzle\Exception\RequestException;
 use FriendsOfOuro\Http\Batch\Guzzle\GuzzleHttpClient;
+use FriendsOfOuro\Http\Batch\Guzzle\ResponseBatch;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
@@ -16,12 +18,16 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\MockObject\Exception as MockException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
+#[CoversClass(ClientException::class)]
 #[CoversClass(GuzzleHttpClient::class)]
+#[UsesClass(BatchItem::class)]
+#[UsesClass(ResponseBatch::class)]
 final class GuzzleHttpClientTest extends TestCase
 {
     public function test_constructor_with_default_client(): void
@@ -128,6 +134,17 @@ final class GuzzleHttpClientTest extends TestCase
         $this->assertEquals('Response 1', $results[0]->getResponse()->getBody()->getContents());
         $this->assertEquals('Request failed', $results[1]->getException()->getMessage());
         $this->assertEquals('Response 3', $results[2]->getResponse()->getBody()->getContents());
+
+        // Test new methods
+        $responses = $batch->getResponses();
+        $this->assertCount(2, $responses);
+
+        $exceptions = $batch->getExceptions();
+        $this->assertCount(1, $exceptions);
+
+        $filteredBatch = $batch->filter(fn ($item) => $item->isSuccess());
+        $this->assertInstanceOf(get_class($batch), $filteredBatch);
+        $this->assertCount(2, $filteredBatch);
     }
 
     public function test_send_request_batch_empty_array(): void

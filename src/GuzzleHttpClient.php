@@ -79,12 +79,9 @@ final readonly class GuzzleHttpClient implements BatchClientInterface
                 // Convert Guzzle exceptions to PSR-18 ClientExceptionInterface
                 $clientException = $this->convertException($response);
                 $batchItems[] = new BatchItem($request, null, $clientException);
-            } elseif ($response instanceof ResponseInterface) {
-                $batchItems[] = new BatchItem($request, $response);
             } else {
-                // Fallback for unexpected types
-                $exception = new Exception\RequestException('Unexpected response type');
-                $batchItems[] = new BatchItem($request, null, $exception);
+                assert($response instanceof ResponseInterface, new \LogicException('Expected ResponseInterface'));
+                $batchItems[] = new BatchItem($request, $response);
             }
         }
 
@@ -106,11 +103,6 @@ final readonly class GuzzleHttpClient implements BatchClientInterface
     {
         return match (true) {
             $exception instanceof GuzzleClientException => new Exception\ClientException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            ),
-            $exception instanceof GuzzleRequestException => new Exception\RequestException(
                 $exception->getMessage(),
                 $exception->getCode(),
                 $exception
