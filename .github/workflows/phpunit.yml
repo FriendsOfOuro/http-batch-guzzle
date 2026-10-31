@@ -1,0 +1,35 @@
+name: PHPUnit Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        php_version: ['8.4', '8.5']
+    runs-on: ubuntu-latest
+    env:
+      PHP_VERSION: ${{ matrix.php_version }}
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+
+    - name: Start the containers
+      run: make up
+
+    - name: Install dependencies
+      run: make install
+
+    - name: Run test suite
+      run: make test
